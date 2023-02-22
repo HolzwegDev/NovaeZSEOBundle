@@ -115,7 +115,8 @@ final class QueryFactory
             $criterions[] = new Criterion\ContentTypeIdentifier($contentTypeIdentifier);
         }
         // bugfix - we want to have multiple content-types  
-        $criterions = array(new Criterion\LogicalOr($criterions));
+        if(count($criterions)>1)
+            $criterions = array(new Criterion\LogicalOr($criterions));
 
         foreach ($subtreeLocationsId as $locationId) {
             $excludedLocation = $this->getLocation($locationId);
