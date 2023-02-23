@@ -113,7 +113,6 @@ class SitemapController extends Controller
             );
             $results[$parent_name][] = array('url' => $url, 'name' => $name);
         }
-        dump($results);
 
         return $this->render("/full/sitemap.html.twig", array("results" => $results));
     }
