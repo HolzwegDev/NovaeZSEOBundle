@@ -67,15 +67,15 @@ final class QueryFactory
 
         // Inclusions
         $config = $this->configResolver->getParameter('sitemap_includes', 'nova_ezseo');
-        $criterions = array_merge(
-            $criterions,
-            $this->getCriterionsForConfig(
+        $criterions_or = $this->getCriterionsForConfig(
                 $config['contentTypeIdentifiers'],
                 $config['locations'],
                 $config['subtrees'],
                 false
-            )
         );
+        // bugfix - we want to have multiple content-types  
+        if(count($criterions_or)>1)
+            $criterions = array_merge($criterions, array(new Criterion\LogicalOr($criterions_or)));
 
         // Exclusions
         $config = $this->configResolver->getParameter('sitemap_excludes', 'nova_ezseo');
@@ -114,9 +114,6 @@ final class QueryFactory
             }
             $criterions[] = new Criterion\ContentTypeIdentifier($contentTypeIdentifier);
         }
-        // bugfix - we want to have multiple content-types  
-        if(count($criterions)>1)
-            $criterions = array(new Criterion\LogicalOr($criterions));
 
         foreach ($subtreeLocationsId as $locationId) {
             $excludedLocation = $this->getLocation($locationId);
