@@ -87,6 +87,38 @@ class SitemapController extends Controller
     }
 
     /**
+     * @Route("/sitemap", name="_novaseo_sitemap_html_index", methods={"GET"})
+     */
+    public function indexHtmlAction(QueryFactory $queryFactory)
+    {
+        $searchService = $this->getRepository()->getSearchService();
+        $locationService = $this->getRepository()->getLocationService();
+        $query = $queryFactory();
+        $query->limit = 0;
+        $resultCount = $searchService->findLocations($query)->totalCount;
+        $query->limit = $resultCount;
+        $results = $searchService->findLocations($query);
+        $searchHits = $results->searchHits;
+        
+        $results = [];
+        foreach ($searchHits as $key => $hit) {
+            $location = $hit->valueObject;
+            $parent = $locationService->loadLocation($location->parentLocationId);
+            $parent_name = $parent->getContentInfo()->name;
+            $name = $location->contentInfo->name;
+            $url = $this->generateUrl(
+                'ez_urlalias',
+                ['locationId' => $location->id],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+            $results[$parent_name][] = array('url' => $url, 'name' => $name);
+        }
+        dump($results);
+
+        return $this->render("/full/sitemap.html.twig", array("results" => $results));
+    }
+
+    /**
      * @Route("/sitemap-{page}.xml", name="_novaseo_sitemap_page", requirements={"page" = "\d+"},
      *                                                             defaults={"page" = 1},
      *                                                             methods={"GET"})
